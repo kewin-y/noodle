@@ -1,9 +1,7 @@
 #include "glad/glad.h"
+#include "shader.h"
 #include "window.h"
 #include <GLFW/glfw3.h>
-
-#define TRUE (1 == 1)
-#define FALSE (!TRUE)
 
 // Declarations
 static void handleInput(GLFWwindow *window);
@@ -12,7 +10,7 @@ static void handleInput(GLFWwindow *window);
 static void handleInput(GLFWwindow *window)
 {
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-                glfwSetWindowShouldClose(window, TRUE);
+                glfwSetWindowShouldClose(window, 1);
         }
 }
 
@@ -21,6 +19,9 @@ int main()
         struct Window window;
 
         window = initWindow(800, 600, "noodle");
+
+        unsigned int shader = createShader("assets/shaders/simpleFrag.glsl",
+                                           "assets/shaders/simpleVert.glsl");
 
         while (!glfwWindowShouldClose(window.self)) {
                 handleInput(window.self);
