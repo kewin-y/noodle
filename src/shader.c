@@ -87,3 +87,12 @@ unsigned int createShader(const char *vertexPath, const char *fragmentPath)
 
         return shaderProgram;
 }
+void shaderSetIntUniform(unsigned int programID, char *name, int value) {
+        glUniform1i(glGetUniformLocation(programID, name), value);
+}
+void shaderSetFloatUniform(unsigned int programID, char *name, float value) {
+        glUniform1f(glGetUniformLocation(programID, name), value);
+}
+void shaderSetBoolUniform(unsigned int programID, char *name, int value) {
+        glUniform1i(glGetUniformLocation(programID, name), value);
+}
