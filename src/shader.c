@@ -31,6 +31,32 @@ static char *getFileContent(const char *filePath)
         return buffer;
 }
 
+static void checkCompileErrors(unsigned int shader) {
+        int success;
+        char infoLog[512];
+
+        glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+
+        if (!success) {
+                glGetShaderInfoLog(shader, 512, NULL, infoLog);
+                printf("Error compiling shader: %s\n", infoLog);
+                exit(1);
+        }
+}
+
+static void checkLinkingErrors(unsigned int shaderProgram) {
+        int success;
+        char infoLog[512];
+
+        glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+
+        if (!success) {
+                glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+                printf("Error linking shader: %s\n", infoLog);
+                exit(1);
+        }
+}
+
 unsigned int createShader(const char *vertexPath, const char *fragmentPath)
 {
         const char *vertexShaderCode = getFileContent(vertexPath);
@@ -43,19 +69,18 @@ unsigned int createShader(const char *vertexPath, const char *fragmentPath)
         vertexShader = glCreateShader(GL_VERTEX_SHADER);
         glShaderSource(vertexShader, 1, &vertexShaderCode, NULL);
         glCompileShader(vertexShader);
-
-        /* TODO Check compile errors */
+        checkCompileErrors(vertexShader);
 
         fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
         glShaderSource(fragmentShader, 1, &fragmentShaderCode, NULL);
         glCompileShader(fragmentShader);
-
-        /* TODO Check compile errors */
+        checkCompileErrors(fragmentShader);
 
         shaderProgram = glCreateProgram();
         glAttachShader(shaderProgram, vertexShader);
         glAttachShader(shaderProgram, fragmentShader);
         glLinkProgram(shaderProgram);
+        checkLinkingErrors(shaderProgram);
 
         free((char *)vertexShaderCode);
         free((char *)fragmentShaderCode);
