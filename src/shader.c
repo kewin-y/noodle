@@ -59,20 +59,20 @@ static void check_linking_errors(unsigned int shader_program) {
 
 unsigned int create_shader(const char *vertex_path, const char *fragment_path)
 {
-        const char *vertex_code = get_file_content(vertex_path);
-        const char *fragment_code = get_file_content(fragment_path);
+        const char *vertex_source = get_file_content(vertex_path);
+        const char *fragment_source = get_file_content(fragment_path);
 
         unsigned int vertex_shader;
         unsigned int fragment_shader;
         unsigned int shader_program;
 
         vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(vertex_shader, 1, &vertex_code, NULL);
+        glShaderSource(vertex_shader, 1, &vertex_source, NULL);
         glCompileShader(vertex_shader);
         check_compile_errors(vertex_shader);
 
         fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(fragment_shader, 1, &fragment_code, NULL);
+        glShaderSource(fragment_shader, 1, &fragment_source, NULL);
         glCompileShader(fragment_shader);
         check_compile_errors(fragment_shader);
 
@@ -82,8 +82,8 @@ unsigned int create_shader(const char *vertex_path, const char *fragment_path)
         glLinkProgram(shader_program);
         check_linking_errors(shader_program);
 
-        free((char *)vertex_code);
-        free((char *)fragment_code);
+        free((char *)vertex_source);
+        free((char *)fragment_source);
 
         return shader_program;
 }

@@ -16,10 +16,11 @@ static void handle_input(GLFWwindow *window)
 
 int main()
 {
-        struct Window window = init_window(800, 600, "noodle");
+        struct Window window;
+        init_window(&window, 800, 600, "noodle");
 
         unsigned int shader = create_shader("assets/shaders/simpleVert.glsl",
-                                           "assets/shaders/simpleFrag.glsl");
+                                            "assets/shaders/simpleFrag.glsl");
 
         // clang-format off
         float vertices[] = {
@@ -40,8 +41,10 @@ int main()
         glBindVertexArray(vao);
 
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices,
+                     GL_STATIC_DRAW);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
+                              (void *)0);
         glEnableVertexAttribArray(0);
 
         glBindVertexArray(0);
