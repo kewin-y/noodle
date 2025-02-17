@@ -4,10 +4,10 @@
 #include <GLFW/glfw3.h>
 
 // Declarations
-static void handleInput(GLFWwindow *window);
+static void handle_input(GLFWwindow *window);
 
 // Definitions
-static void handleInput(GLFWwindow *window)
+static void handle_input(GLFWwindow *window)
 {
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
                 glfwSetWindowShouldClose(window, 1);
@@ -16,9 +16,9 @@ static void handleInput(GLFWwindow *window)
 
 int main()
 {
-        struct Window window = initWindow(800, 600, "noodle");
+        struct Window window = init_window(800, 600, "noodle");
 
-        unsigned int shader = createShader("assets/shaders/simpleVert.glsl",
+        unsigned int shader = create_shader("assets/shaders/simpleVert.glsl",
                                            "assets/shaders/simpleFrag.glsl");
 
         // clang-format off
@@ -55,7 +55,7 @@ int main()
                 glBindVertexArray(vao);
                 glDrawArrays(GL_TRIANGLES, 0, 3);
 
-                handleInput(window.self);
+                handle_input(window.self);
                 glfwSwapBuffers(window.self);
                 glfwPollEvents();
         }

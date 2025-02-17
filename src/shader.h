@@ -1,9 +1,9 @@
 #ifndef INCLUDE_SRC_SHADER_H_
 #define INCLUDE_SRC_SHADER_H_
 
-unsigned int createShader(const char *vertexPath, const char *fragmentPath);
-void shaderSetIntUniform(unsigned int programID, char *name, int value);
-void shaderSetFloatUniform(unsigned int programID, char *name, float value);
-void shaderSetBoolUniform(unsigned int programID, char *name, int value);
+unsigned int create_shader(const char *vertexPath, const char *fragmentPath);
+void shader_set_uniform_i(unsigned int programID, char *name, int value);
+void shader_set_uniform_f(unsigned int programID, char *name, float value);
+void shader_set_uniform_b(unsigned int programID, char *name, int value);
 
 #endif // INCLUDE_SRC_SHADER_H_

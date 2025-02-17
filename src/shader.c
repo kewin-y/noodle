@@ -3,14 +3,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static char *getFileContent(const char *filePath)
+static char *get_file_content(const char *file_path)
 {
         char *buffer = NULL;
         long length;
-        FILE *file = fopen(filePath, "rb");
+        FILE *file = fopen(file_path, "rb");
 
         if (NULL == file) {
-                printf("Failed to load shader file: %s\n", filePath);
+                printf("Failed to load shader file: %s\n", file_path);
                 exit(1);
         }
 
@@ -31,7 +31,7 @@ static char *getFileContent(const char *filePath)
         return buffer;
 }
 
-static void checkCompileErrors(unsigned int shader) {
+static void check_compile_errors(unsigned int shader) {
         int success;
         char infoLog[512];
 
@@ -44,55 +44,55 @@ static void checkCompileErrors(unsigned int shader) {
         }
 }
 
-static void checkLinkingErrors(unsigned int shaderProgram) {
+static void check_linking_errors(unsigned int shader_program) {
         int success;
-        char infoLog[512];
+        char info_log[512];
 
-        glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+        glGetProgramiv(shader_program, GL_LINK_STATUS, &success);
 
         if (!success) {
-                glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-                printf("Error linking shader: %s\n", infoLog);
+                glGetProgramInfoLog(shader_program, 512, NULL, info_log);
+                printf("Error linking shader: %s\n", info_log);
                 exit(1);
         }
 }
 
-unsigned int createShader(const char *vertexPath, const char *fragmentPath)
+unsigned int create_shader(const char *vertex_path, const char *fragment_path)
 {
-        const char *vertexShaderCode = getFileContent(vertexPath);
-        const char *fragmentShaderCode = getFileContent(fragmentPath);
+        const char *vertex_code = get_file_content(vertex_path);
+        const char *fragment_code = get_file_content(fragment_path);
 
-        unsigned int vertexShader;
-        unsigned int fragmentShader;
-        unsigned int shaderProgram;
+        unsigned int vertex_shader;
+        unsigned int fragment_shader;
+        unsigned int shader_program;
 
-        vertexShader = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(vertexShader, 1, &vertexShaderCode, NULL);
-        glCompileShader(vertexShader);
-        checkCompileErrors(vertexShader);
+        vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+        glShaderSource(vertex_shader, 1, &vertex_code, NULL);
+        glCompileShader(vertex_shader);
+        check_compile_errors(vertex_shader);
 
-        fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(fragmentShader, 1, &fragmentShaderCode, NULL);
-        glCompileShader(fragmentShader);
-        checkCompileErrors(fragmentShader);
+        fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+        glShaderSource(fragment_shader, 1, &fragment_code, NULL);
+        glCompileShader(fragment_shader);
+        check_compile_errors(fragment_shader);
 
-        shaderProgram = glCreateProgram();
-        glAttachShader(shaderProgram, vertexShader);
-        glAttachShader(shaderProgram, fragmentShader);
-        glLinkProgram(shaderProgram);
-        checkLinkingErrors(shaderProgram);
+        shader_program = glCreateProgram();
+        glAttachShader(shader_program, vertex_shader);
+        glAttachShader(shader_program, fragment_shader);
+        glLinkProgram(shader_program);
+        check_linking_errors(shader_program);
 
-        free((char *)vertexShaderCode);
-        free((char *)fragmentShaderCode);
+        free((char *)vertex_code);
+        free((char *)fragment_code);
 
-        return shaderProgram;
+        return shader_program;
 }
-void shaderSetIntUniform(unsigned int programID, char *name, int value) {
-        glUniform1i(glGetUniformLocation(programID, name), value);
+void shader_set_uniform_i(unsigned int program_id, char *name, int value) {
+        glUniform1i(glGetUniformLocation(program_id, name), value);
 }
-void shaderSetFloatUniform(unsigned int programID, char *name, float value) {
-        glUniform1f(glGetUniformLocation(programID, name), value);
+void shader_set_uniform_f(unsigned int program_id, char *name, float value) {
+        glUniform1f(glGetUniformLocation(program_id, name), value);
 }
-void shaderSetBoolUniform(unsigned int programID, char *name, int value) {
-        glUniform1i(glGetUniformLocation(programID, name), value);
+void shader_set_uniform_b(unsigned int program_id, char *name, int value) {
+        glUniform1i(glGetUniformLocation(program_id, name), value);
 }

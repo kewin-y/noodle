@@ -11,6 +11,6 @@ struct Window {
         GLFWwindow *self;
 };
 
-struct Window initWindow(int width, int height, const char *name);
+struct Window init_window(int width, int height, const char *name);
 
 #endif // INCLUDE_SRC_WINDOW_H_

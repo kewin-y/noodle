@@ -4,12 +4,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static void framebufferSizeCallback(GLFWwindow *window, int width, int height)
+static void fb_size_callback(GLFWwindow *window, int width, int height)
 {
         glViewport(0, 0, width, height);
 }
 
-struct Window initWindow(int width, int height, const char *name)
+struct Window init_window(int width, int height, const char *name)
 {
         struct Window win;
 
@@ -31,7 +31,7 @@ struct Window initWindow(int width, int height, const char *name)
         }
 
         glfwMakeContextCurrent(win.self);
-        glfwSetFramebufferSizeCallback(win.self, framebufferSizeCallback);
+        glfwSetFramebufferSizeCallback(win.self, fb_size_callback);
 
         if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
                 printf("Error: Failed to initialize GLAD.");
