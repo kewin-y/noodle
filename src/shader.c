@@ -22,12 +22,13 @@ static char *get_file_content(const char *file_path)
         if (NULL == buffer) {
                 printf("Failed to allocate %ld bytes for buffer.\n",
                        length + 1);
+                fclose(file);
                 exit(1);
         }
 
         fread(buffer, 1, length, file);
-        *(buffer + length) = '\0';
-
+        buffer[length] = '\0';
+        fclose(file);
         return buffer;
 }
 

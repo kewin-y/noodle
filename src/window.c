@@ -11,6 +11,10 @@ static void fb_size_callback(GLFWwindow *window, int width, int height)
 
 void init_window(struct Window *win, int width, int height, const char *name)
 {
+        if (NULL == win) {
+                printf("win is NULL :( (HOW DO YOU EVEN MESS THIS UP?)\n");
+                return;
+        }
 
         win->width = width;
         win->height = height;
