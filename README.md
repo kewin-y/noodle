@@ -1,5 +1,7 @@
 # noodle
 
-A simple graphics engine made using OpenGL.
+Thank you, [Learn OpenGL](https://learnopengl.com/)!
 
-Thanks to [Learn OpenGL](https://learnopengl.com/)!
+# TODO
+
+- [ ] Refactor 😭
