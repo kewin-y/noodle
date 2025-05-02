@@ -32,7 +32,8 @@ static char *get_file_content(const char *file_path)
         return buffer;
 }
 
-static void check_compile_errors(unsigned int shader) {
+static void check_compile_errors(unsigned int shader)
+{
         int success;
         char infoLog[512];
 
@@ -45,7 +46,8 @@ static void check_compile_errors(unsigned int shader) {
         }
 }
 
-static void check_linking_errors(unsigned int shader_program) {
+static void check_linking_errors(unsigned int shader_program)
+{
         int success;
         char info_log[512];
 
@@ -58,7 +60,7 @@ static void check_linking_errors(unsigned int shader_program) {
         }
 }
 
-unsigned int create_shader(const char *vertex_path, const char *fragment_path)
+unsigned int n_create_shader(const char *vertex_path, const char *fragment_path)
 {
         const char *vertex_source = get_file_content(vertex_path);
         const char *fragment_source = get_file_content(fragment_path);
@@ -88,12 +90,21 @@ unsigned int create_shader(const char *vertex_path, const char *fragment_path)
 
         return shader_program;
 }
-void shader_set_uniform_i(unsigned int program_id, char *name, int value) {
+void n_shader_set_uniform_i(unsigned int program_id, char *name, int value)
+{
         glUniform1i(glGetUniformLocation(program_id, name), value);
 }
-void shader_set_uniform_f(unsigned int program_id, char *name, float value) {
+void n_shader_set_uniform_f(unsigned int program_id, char *name, float value)
+{
         glUniform1f(glGetUniformLocation(program_id, name), value);
 }
-void shader_set_uniform_b(unsigned int program_id, char *name, int value) {
+void n_shader_set_uniform_b(unsigned int program_id, char *name, int value)
+{
         glUniform1i(glGetUniformLocation(program_id, name), value);
+}
+
+void n_shader_set_uniform_m4(unsigned int program_id, char *name, float *mat)
+{
+        glUniformMatrix4fv(glGetUniformLocation(program_id, name), 1, GL_FALSE,
+                           mat);
 }

@@ -20,14 +20,14 @@
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
             bear
+            valgrind-light
+            clang-tools
           ];
 
-          # Things that should be linked against
           buildInputs = with pkgs; [
             glfw
             cglm
             stb
-            valgrind
             xorg.libX11
             xorg.libXrandr
             xorg.libXi

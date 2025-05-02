@@ -4,15 +4,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static void fb_size_callback(GLFWwindow *window, int width, int height)
+static void n_fb_size_callback(GLFWwindow *window, int width, int height)
 {
         glViewport(0, 0, width, height);
 }
 
-void init_window(struct Window *win, int width, int height, const char *name)
+void n_init_window(struct Window *win, int width, int height, const char *name)
 {
         if (NULL == win) {
-                printf("win is NULL :( (HOW DO YOU EVEN MESS THIS UP?)\n");
+                printf("Error in function n_init_window(): win is NULL\n");
                 return;
         }
 
@@ -34,7 +34,7 @@ void init_window(struct Window *win, int width, int height, const char *name)
         }
 
         glfwMakeContextCurrent(win->self);
-        glfwSetFramebufferSizeCallback(win->self, fb_size_callback);
+        glfwSetFramebufferSizeCallback(win->self, n_fb_size_callback);
 
         if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
                 printf("Error: Failed to initialize GLAD.");

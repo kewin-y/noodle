@@ -22,6 +22,6 @@ struct Texture {
 
 };
 
-void init_texture(struct Texture *texture, const char *path);
+void n_init_texture(struct Texture *texture, const char *path);
 
 #endif // INCLUDE_SRC_TEXTURE_H_

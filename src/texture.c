@@ -6,7 +6,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
-static GLenum get_texture_format(int num_channels)
+static GLenum n_get_texture_format(int num_channels)
 {
         switch (num_channels) {
         case 1:
@@ -22,7 +22,7 @@ static GLenum get_texture_format(int num_channels)
         }
 }
 
-void init_texture(struct Texture *texture, const char *path)
+void n_init_texture(struct Texture *texture, const char *path)
 {
         unsigned char *data = NULL;
         GLenum format;
@@ -54,7 +54,7 @@ void init_texture(struct Texture *texture, const char *path)
                 exit(1);
         }
 
-        format = get_texture_format(texture->num_channels);
+        format = n_get_texture_format(texture->num_channels);
 
         if (0 == format) {
                 printf("Error in function init_texture(): "
