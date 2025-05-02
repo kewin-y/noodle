@@ -1,4 +1,5 @@
 #include "cglm/cam.h"
+#include "cglm/mat4.h"
 #include "glad/glad.h"
 #include "shader.h"
 #include "texture.h"
@@ -21,13 +22,17 @@ int main()
 {
         struct Window window;
         struct Texture texture;
+
         unsigned int shader;
         unsigned int vao, vbo;
 
         mat4 model, view, projection;
-        vec3 axis, camera_pos;
-        float axis_arr[] = {0.5f, 1.0f, 0.0f};
-        float camera_pos_arr[] = {0.0f, 0.0f, -3.0f};
+
+        // For view
+        const float radius = 10.0f;
+        vec3 camera_pos = {0.0f, 0.0f, 0.0f};
+        vec3 target = {0.0f, 0.0f, 0.0f};
+        vec3 up = {0.0f, 1.0f, 0.0f};
 
         n_init_window(&window, 800, 600, "noodle");
         n_init_texture(&texture, "assets/textures/container.jpg");
@@ -82,7 +87,6 @@ int main()
 
         glGenVertexArrays(1, &vao);
         glGenBuffers(1, &vbo);
-        // glGenBuffers(1, &ebo);
 
         glBindVertexArray(vao);
 
@@ -118,8 +122,9 @@ int main()
 
                 glUseProgram(shader);
 
-                glm_vec3_make(camera_pos_arr, camera_pos);
-                glm_translate_make(view, camera_pos);
+                camera_pos[0] = cos(glfwGetTime()) * radius;
+                camera_pos[2] = sin(glfwGetTime()) * radius;
+                glm_lookat(camera_pos, target, up, view);
 
                 glm_perspective(glm_rad(45.0f),
                                 (float)window.width / (float)window.height,
@@ -132,9 +137,7 @@ int main()
                 glBindVertexArray(vao);
 
                 /* AGHH */
-                glm_vec3_make(axis_arr, axis);
-                glm_rotate_make(model, (float)glfwGetTime() * glm_rad(-55.0f),
-                                axis);
+                glm_mat4_identity(model);
                 n_shader_set_uniform_m4(shader, "model", &model[0][0]);
 
                 glDrawArrays(GL_TRIANGLES, 0, 36);
