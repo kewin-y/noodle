@@ -125,7 +125,7 @@ int main()
         glfwSetInputMode(win.self, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         glfwSetCursorPosCallback(win.self, mouse_callback);
 
-        n_init_texture(&texture, "assets/textures/container.jpg");
+        n_init_texture(&texture, "assets/textures/dirt.png");
         shader = n_create_shader("assets/shaders/simpleVert.glsl",
                                  "assets/shaders/simpleFrag.glsl");
 

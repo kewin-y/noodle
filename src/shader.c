@@ -42,7 +42,6 @@ static void check_compile_errors(unsigned int shader)
         if (!success) {
                 glGetShaderInfoLog(shader, 512, NULL, infoLog);
                 printf("Error compiling shader: %s\n", infoLog);
-                exit(1);
         }
 }
 
@@ -56,7 +55,6 @@ static void check_linking_errors(unsigned int shader_program)
         if (!success) {
                 glGetProgramInfoLog(shader_program, 512, NULL, info_log);
                 printf("Error linking shader: %s\n", info_log);
-                exit(1);
         }
 }
 
