@@ -1,5 +1,6 @@
-IndentWidth: 8
+IndentWidth: 4
 IndentAccessModifiers: false
 BreakBeforeBraces: Linux
-AccessModifierOffset: -8
+AccessModifierOffset: -4
+ColumnLimit: 0
 
