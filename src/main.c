@@ -25,8 +25,12 @@ struct App {
   struct InputState input;
   struct AppConfig config;
   struct Texture texture;
-  struct Shader shader;
+
+  struct Shader cube_shader;
+
   struct Mesh cube;
+  struct Mesh light;
+
   float delta_time;
   float last_frame;
 };
@@ -34,7 +38,7 @@ struct App {
 static void app_destroy(struct App *app)
 {
   n_mesh_destroy(&app->cube);
-  n_shader_destroy(&app->shader);
+  n_shader_destroy(&app->cube_shader);
   n_texture_destroy(&app->texture);
   n_window_destroy(&app->window);
   glfwTerminate();
@@ -128,7 +132,7 @@ static bool app_init(struct App *app)
   app->delta_time = 0.0f;
   app->last_frame = 0.0f;
   app->texture.id = 0;
-  app->shader.id = 0;
+  app->cube_shader.id = 0;
   app->cube.vao = 0;
   app->cube.vbo = 0;
   app->cube.vertex_count = 0;
@@ -148,15 +152,17 @@ static bool app_init(struct App *app)
     return false;
   }
 
-  if (!n_shader_init(&app->shader, ASSETS_PATH "shaders/simpleVert.glsl",
-                     ASSETS_PATH "shaders/simpleFrag.glsl")) {
+  if (!n_shader_init(&app->cube_shader, ASSETS_PATH "shaders/cube_vert.glsl",
+                     ASSETS_PATH "shaders/cube_frag.glsl")) {
     return false;
   }
 
-  n_mesh_init_cube(&app->cube);
+  n_mesh_init_cube(&app->cube, true);
 
-  n_shader_use(&app->shader);
-  n_shader_set_uniform_i(&app->shader, "v_texture", 0);
+  n_shader_use(&app->cube_shader);
+
+  // Texture unit 0 -> `tex`
+  n_shader_set_uniform_i(&app->cube_shader, "tex", 0);
 
   glEnable(GL_DEPTH_TEST);
   return true;
@@ -171,20 +177,23 @@ static void app_render(struct App *app)
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+  // Bind
   n_texture_bind(&app->texture, 0);
-  n_shader_use(&app->shader);
+  n_shader_use(&app->cube_shader);
 
+  // Setup
   n_camera_view_matrix(&app->camera, view);
   glm_perspective(glm_rad(45.0f),
                   (float)app->window.width / (float)app->window.height,
                   0.1f, 100.0f, projection);
 
-  n_shader_set_uniform_m4(&app->shader, "view", &view[0][0]);
-  n_shader_set_uniform_m4(&app->shader, "projection", &projection[0][0]);
+  n_shader_set_uniform_m4(&app->cube_shader, "view", &view[0][0]);
+  n_shader_set_uniform_m4(&app->cube_shader, "projection", &projection[0][0]);
 
   glm_mat4_identity(model);
-  n_shader_set_uniform_m4(&app->shader, "model", &model[0][0]);
+  n_shader_set_uniform_m4(&app->cube_shader, "model", &model[0][0]);
 
+  // Render
   n_mesh_draw(&app->cube);
 }
 

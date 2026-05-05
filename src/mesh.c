@@ -3,10 +3,54 @@
 #include "glad/glad.h"
 #include <stddef.h>
 
-void n_mesh_init_cube(struct Mesh *mesh)
+void n_mesh_init_cube(struct Mesh *mesh, bool with_texture)
 {
   // clang-format off
-  float vertices[] = {
+  float vertices_no_tex_coord[] = {
+    -0.5f, -0.5f, -0.5f,
+     0.5f, -0.5f, -0.5f,
+     0.5f,  0.5f, -0.5f,
+     0.5f,  0.5f, -0.5f,
+    -0.5f,  0.5f, -0.5f,
+    -0.5f, -0.5f, -0.5f,
+
+    -0.5f, -0.5f,  0.5f,
+     0.5f, -0.5f,  0.5f,
+     0.5f,  0.5f,  0.5f,
+     0.5f,  0.5f,  0.5f,
+    -0.5f,  0.5f,  0.5f,
+    -0.5f, -0.5f,  0.5f,
+
+    -0.5f,  0.5f,  0.5f,
+    -0.5f,  0.5f, -0.5f,
+    -0.5f, -0.5f, -0.5f,
+    -0.5f, -0.5f, -0.5f,
+    -0.5f, -0.5f,  0.5f,
+    -0.5f,  0.5f,  0.5f,
+
+     0.5f,  0.5f,  0.5f,
+     0.5f,  0.5f, -0.5f,
+     0.5f, -0.5f, -0.5f,
+     0.5f, -0.5f, -0.5f,
+     0.5f, -0.5f,  0.5f,
+     0.5f,  0.5f,  0.5f,
+
+    -0.5f, -0.5f, -0.5f,
+     0.5f, -0.5f, -0.5f,
+     0.5f, -0.5f,  0.5f,
+     0.5f, -0.5f,  0.5f,
+    -0.5f, -0.5f,  0.5f,
+    -0.5f, -0.5f, -0.5f,
+
+    -0.5f,  0.5f, -0.5f,
+     0.5f,  0.5f, -0.5f,
+     0.5f,  0.5f,  0.5f,
+     0.5f,  0.5f,  0.5f,
+    -0.5f,  0.5f,  0.5f,
+    -0.5f,  0.5f, -0.5f
+  };
+
+  float vertices_tex_coord[] = {
     -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
      0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
      0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
@@ -51,6 +95,10 @@ void n_mesh_init_cube(struct Mesh *mesh)
   };
   // clang-format on
 
+  // 5 -> no. entries w/ texture (vec3 and vec2)
+  // 3 -> no. entries w/o texture (vec3 only)
+  const size_t stride = with_texture ? 5 * sizeof(float) : 3 * sizeof(float);
+
   mesh->vertex_count = 36;
 
   glGenVertexArrays(1, &mesh->vao);
@@ -59,15 +107,21 @@ void n_mesh_init_cube(struct Mesh *mesh)
   glBindVertexArray(mesh->vao);
 
   glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                        (void *)0);
+  if (with_texture)
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_tex_coord),
+                 vertices_tex_coord, GL_STATIC_DRAW);
+  else
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_no_tex_coord),
+                 vertices_no_tex_coord, GL_STATIC_DRAW);
+
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void *)0);
   glEnableVertexAttribArray(0);
 
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                        (void *)(3 * sizeof(float)));
-  glEnableVertexAttribArray(1);
+  if (with_texture) {
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, (void *)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+  }
 
   glBindVertexArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
