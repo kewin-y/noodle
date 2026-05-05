@@ -1,10 +1,20 @@
-#ifndef INCLUDE_SRC_SHADER_H_
-#define INCLUDE_SRC_SHADER_H_
+#ifndef INCLUDE_SRC_SHADER_H
+#define INCLUDE_SRC_SHADER_H
 
-unsigned int n_create_shader(const char *vertexPath, const char *fragmentPath);
-void n_shader_set_uniform_i(unsigned int program_id, char *name, int value);
-void n_shader_set_uniform_f(unsigned int program_id, char *name, float value);
-void n_shader_set_uniform_b(unsigned int program_id, char *name, int value);
-void n_shader_set_uniform_m4(unsigned int program_id, char *name, float *mat);
+#include <stdbool.h>
 
-#endif // INCLUDE_SRC_SHADER_H_
+struct Shader {
+  unsigned int id;
+};
+
+bool n_shader_init(struct Shader *shader, const char *vertex_path,
+                   const char *fragment_path);
+void n_shader_use(const struct Shader *shader);
+void n_shader_destroy(struct Shader *shader);
+void n_shader_set_uniform_i(const struct Shader *shader, const char *name, int value);
+void n_shader_set_uniform_f(const struct Shader *shader, const char *name, float value);
+void n_shader_set_uniform_b(const struct Shader *shader, const char *name, int value);
+void n_shader_set_uniform_m4(const struct Shader *shader, const char *name,
+                             const float *mat);
+
+#endif

@@ -1,246 +1,211 @@
+#include "camera.h"
 #include "glad/glad.h"
+#include "mesh.h"
 #include "shader.h"
 #include "texture.h"
 #include "window.h"
+
 #include <GLFW/glfw3.h>
 #include <cglm/cglm.h>
 #include <config.h>
-#include <math.h>
 
-// GLOBALS
-vec3 camera_pos = {0.0f, 0.0f, 3.0f};
-vec3 camera_front = {0.0f, 0.0f, -1.0f};
-vec3 camera_up = {0.0f, 1.0f, 0.0f};
-vec3 camera_center = {0.0f, 0.0f, 0.0f};
+struct InputState {
+  float last_x;
+  float last_y;
+  int first_mouse;
+};
 
-float last_x = 400.0f, last_y = 300.0f;
-float pitch = 0.0f, yaw = -90.0f;
-int first_mouse = 1;
+struct AppConfig {
+  const char *assets_path;
+};
 
-float delta_time = 0.0f;
-float last_frame = 0.0f;
+struct App {
+  struct Window window;
+  struct Camera camera;
+  struct InputState input;
+  struct AppConfig config;
+  struct Texture texture;
+  struct Shader shader;
+  struct Mesh cube;
+  float delta_time;
+  float last_frame;
+};
 
-static void handle_input(GLFWwindow *win)
+static void app_destroy(struct App *app)
 {
-    const float camera_speed = 2.5f * delta_time;
-
-    vec3 right, forward;
-
-    if (glfwGetKey(win, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-        glfwSetWindowShouldClose(win, 1);
-    }
-
-    glm_vec3_cross(camera_front, camera_up, right);
-    glm_vec3_normalize(right);
-    glm_vec3_cross(camera_up, right, forward);
-    glm_vec3_normalize(forward);
-
-    if (glfwGetKey(win, GLFW_KEY_W) == GLFW_PRESS) {
-        vec3 tmp;
-        glm_vec3_scale(forward, camera_speed, tmp);
-        glm_vec3_add(camera_pos, tmp, camera_pos);
-    }
-
-    if (glfwGetKey(win, GLFW_KEY_S) == GLFW_PRESS) {
-        vec3 tmp;
-        glm_vec3_scale(forward, -camera_speed, tmp);
-        glm_vec3_add(camera_pos, tmp, camera_pos);
-    }
-
-    if (glfwGetKey(win, GLFW_KEY_A) == GLFW_PRESS) {
-        vec3 tmp;
-        glm_vec3_scale(right, -camera_speed, tmp);
-        glm_vec3_add(camera_pos, tmp, camera_pos);
-    }
-
-    if (glfwGetKey(win, GLFW_KEY_D) == GLFW_PRESS) {
-        vec3 tmp;
-        glm_vec3_scale(right, camera_speed, tmp);
-        glm_vec3_add(camera_pos, tmp, camera_pos);
-    }
-
-    if (glfwGetKey(win, GLFW_KEY_SPACE) == GLFW_PRESS) {
-        vec3 tmp;
-        glm_vec3_scale(camera_up, camera_speed, tmp);
-        glm_vec3_add(camera_pos, tmp, camera_pos);
-    }
-
-    if (glfwGetKey(win, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-        vec3 tmp;
-        glm_vec3_scale(camera_up, -camera_speed, tmp);
-        glm_vec3_add(camera_pos, tmp, camera_pos);
-    }
+  n_mesh_destroy(&app->cube);
+  n_shader_destroy(&app->shader);
+  n_texture_destroy(&app->texture);
+  n_window_destroy(&app->window);
+  glfwTerminate();
 }
 
-static void mouse_callback(GLFWwindow *win, double x_pos, double y_pos)
+static void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
-    if (first_mouse) {
-        last_x = x_pos;
-        last_y = y_pos;
-        first_mouse = 0;
-    }
+  struct App *app = glfwGetWindowUserPointer(window);
 
-    float x_offset = x_pos - last_x;
-    float y_offset = last_y - y_pos; // As (0,0) is in the top-left corner
-    const float sensitivity = 0.2f;
+  if (app != NULL) {
+    app->window.width = width;
+    app->window.height = height;
+  }
 
-    vec3 direction;
-
-    last_x = x_pos;
-    last_y = y_pos;
-
-    x_offset *= sensitivity;
-    y_offset *= sensitivity;
-
-    yaw += x_offset;
-    pitch += y_offset;
-
-    if (pitch > 89.0f)
-        pitch = 89.0f;
-    if (pitch < -89.0f)
-        pitch = -89.0f;
-
-    direction[0] = cos(glm_rad(yaw)) * cos(glm_rad(pitch));
-    direction[1] = sin(glm_rad(pitch));
-    direction[2] = sin(glm_rad(yaw)) * cos(glm_rad(pitch));
-
-    glm_normalize_to(direction, camera_front);
+  glViewport(0, 0, width, height);
 }
 
-int main()
+static void mouse_callback(GLFWwindow *window, double x_pos, double y_pos)
 {
-    struct Window win;
-    struct Texture texture;
+  struct App *app = glfwGetWindowUserPointer(window);
+  float x_offset;
+  float y_offset;
 
-    unsigned int shader;
+  if (app == NULL) {
+    return;
+  }
 
-    unsigned int vao, vbo;
+  if (app->input.first_mouse) {
+    app->input.last_x = (float)x_pos;
+    app->input.last_y = (float)y_pos;
+    app->input.first_mouse = 0;
+  }
 
-    mat4 model, view, projection;
+  x_offset = (float)x_pos - app->input.last_x;
+  y_offset = app->input.last_y - (float)y_pos;
 
-    float current_frame;
+  app->input.last_x = (float)x_pos;
+  app->input.last_y = (float)y_pos;
 
-    n_init_window(&win, 800, 600, "noodle");
+  n_camera_process_mouse(&app->camera, x_offset, y_offset);
+}
 
-    glfwSetInputMode(win.self, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    glfwSetCursorPosCallback(win.self, mouse_callback);
+static void app_handle_input(struct App *app)
+{
+  GLFWwindow *window = app->window.self;
+  const float camera_speed = 2.5f * app->delta_time;
 
-    n_init_texture(&texture, ASSETS_PATH "textures/dirt.png");
+  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+    glfwSetWindowShouldClose(window, 1);
+  }
 
-    shader = n_create_shader(ASSETS_PATH "shaders/simpleVert.glsl",
-                             ASSETS_PATH "shaders/simpleFrag.glsl");
+  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+    n_camera_move_forward(&app->camera, camera_speed);
+  }
 
-    // clang-format off
-    float vertices[] = {
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+    n_camera_move_forward(&app->camera, -camera_speed);
+  }
 
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+    n_camera_move_right(&app->camera, -camera_speed);
+  }
 
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+    n_camera_move_right(&app->camera, camera_speed);
+  }
 
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+  if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+    n_camera_move_up(&app->camera, camera_speed);
+  }
 
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+  if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+    n_camera_move_up(&app->camera, -camera_speed);
+  }
+}
 
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-    };
-    // clang-format on
+static void app_update_time(struct App *app)
+{
+  float current_frame = (float)glfwGetTime();
 
-    glGenVertexArrays(1, &vao);
-    glGenBuffers(1, &vbo);
+  app->delta_time = current_frame - app->last_frame;
+  app->last_frame = current_frame;
+}
 
-    glBindVertexArray(vao);
+static bool app_init(struct App *app)
+{
+  app->config.assets_path = ASSETS_PATH;
+  app->input.last_x = 400.0f;
+  app->input.last_y = 300.0f;
+  app->input.first_mouse = 1;
+  app->delta_time = 0.0f;
+  app->last_frame = 0.0f;
+  app->texture.id = 0;
+  app->shader.id = 0;
+  app->cube.vao = 0;
+  app->cube.vbo = 0;
+  app->cube.vertex_count = 0;
 
-    // Setup VBO
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices,
-                 GL_STATIC_DRAW);
+  n_camera_init(&app->camera);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                          (void *)0);
-    glEnableVertexAttribArray(0);
+  if (!n_init_window(&app->window, 800, 600, "noodle")) {
+    return false;
+  }
 
-    // a_tex_coord
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                          (void *)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
+  glfwSetWindowUserPointer(app->window.self, app);
+  glfwSetFramebufferSizeCallback(app->window.self, framebuffer_size_callback);
+  glfwSetInputMode(app->window.self, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  glfwSetCursorPosCallback(app->window.self, mouse_callback);
 
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  if (!n_init_texture(&app->texture, ASSETS_PATH "textures/dirt.png")) {
+    return false;
+  }
 
-    glUseProgram(shader);
-    n_shader_set_uniform_i(shader, "v_texture", 0);
+  if (!n_shader_init(&app->shader, ASSETS_PATH "shaders/simpleVert.glsl",
+                     ASSETS_PATH "shaders/simpleFrag.glsl")) {
+    return false;
+  }
 
-    glEnable(GL_DEPTH_TEST);
+  n_mesh_init_cube(&app->cube);
 
-    while (!glfwWindowShouldClose(win.self)) {
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  n_shader_use(&app->shader);
+  n_shader_set_uniform_i(&app->shader, "v_texture", 0);
 
-        current_frame = glfwGetTime();
-        delta_time = current_frame - last_frame;
-        last_frame = current_frame;
+  glEnable(GL_DEPTH_TEST);
+  return true;
+}
 
-        // printf("delta_time=%f\n", delta_time);
+static void app_render(struct App *app)
+{
+  mat4 model;
+  mat4 view;
+  mat4 projection;
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture.id);
+  glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glUseProgram(shader);
+  n_texture_bind(&app->texture, 0);
+  n_shader_use(&app->shader);
 
-        glm_vec3_print(camera_front, stdout);
-        glm_vec3_add(camera_pos, camera_front, camera_center);
-        glm_lookat(camera_pos, camera_center, camera_up, view);
+  n_camera_view_matrix(&app->camera, view);
+  glm_perspective(glm_rad(45.0f),
+                  (float)app->window.width / (float)app->window.height,
+                  0.1f, 100.0f, projection);
 
-        glm_perspective(glm_rad(45.0f), (float)win.width / (float)win.height, 0.1f, 100.0f, projection);
+  n_shader_set_uniform_m4(&app->shader, "view", &view[0][0]);
+  n_shader_set_uniform_m4(&app->shader, "projection", &projection[0][0]);
 
-        n_shader_set_uniform_m4(shader, "view", &view[0][0]);
-        n_shader_set_uniform_m4(shader, "projection", &projection[0][0]);
+  glm_mat4_identity(model);
+  n_shader_set_uniform_m4(&app->shader, "model", &model[0][0]);
 
-        glBindVertexArray(vao);
+  n_mesh_draw(&app->cube);
+}
 
-        /* AGHH */
-        glm_mat4_identity(model);
-        n_shader_set_uniform_m4(shader, "model", &model[0][0]);
+int main(void)
+{
+  struct App app;
 
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+  if (!app_init(&app)) {
+    app_destroy(&app);
+    return 1;
+  }
 
-        handle_input(win.self);
-        glfwSwapBuffers(win.self);
-        glfwWaitEvents();
-    }
+  while (!glfwWindowShouldClose(app.window.self)) {
+    app_update_time(&app);
+    app_handle_input(&app);
+    app_render(&app);
 
-    glfwTerminate();
-    return 0;
+    glfwSwapBuffers(app.window.self);
+    glfwWaitEvents();
+  }
+
+  app_destroy(&app);
+  return 0;
 }

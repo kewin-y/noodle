@@ -1,16 +1,18 @@
-#ifndef INCLUDE_SRC_WINDOW_H_
-#define INCLUDE_SRC_WINDOW_H_
+#ifndef INCLUDE_SRC_WINDOW_H
+#define INCLUDE_SRC_WINDOW_H
 
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
+#include <stdbool.h>
 
 struct Window {
-        int width;
-        int height;
-        const char *name;
-        GLFWwindow *self;
+  int width;
+  int height;
+  const char *name;
+  GLFWwindow *self;
 };
 
-void n_init_window(struct Window *win, int width, int height, const char *name);
+bool n_init_window(struct Window *win, int width, int height, const char *name);
+void n_window_destroy(struct Window *win);
 
-#endif // INCLUDE_SRC_WINDOW_H_
+#endif

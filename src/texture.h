@@ -1,5 +1,7 @@
-#ifndef INCLUDE_SRC_TEXTURE_H_
-#define INCLUDE_SRC_TEXTURE_H_
+#ifndef INCLUDE_SRC_TEXTURE_H
+#define INCLUDE_SRC_TEXTURE_H
+
+#include <stdbool.h>
 
 /*
  * TEXTURE STRUCT
@@ -15,13 +17,14 @@
  */
 
 struct Texture {
-        unsigned int id;
-        int width;
-        int height;
-        int num_channels;
-
+  unsigned int id;
+  int width;
+  int height;
+  int num_channels;
 };
 
-void n_init_texture(struct Texture *texture, const char *path);
+bool n_init_texture(struct Texture *texture, const char *path);
+void n_texture_bind(const struct Texture *texture, unsigned int unit);
+void n_texture_destroy(struct Texture *texture);
 
-#endif // INCLUDE_SRC_TEXTURE_H_
+#endif

@@ -42,6 +42,8 @@ add_subdirectory(external/stb_image)
 
 set(SOURCE_FILES
   src/main.c
+  src/camera.c
+  src/mesh.c
   src/texture.c
   src/window.c
   src/shader.c
