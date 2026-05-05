@@ -1,5 +1,5 @@
 {
-  description = "Minecraft Clone";
+  description = "...";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -35,16 +35,11 @@
               libffi
               libxkbcommon
               wayland-scanner
-              git
-              ;
-
-            inherit
-              (pkgs.xorg)
-              libX11
-              libXrandr
-              libXi
-              libXinerama
-              libXcursor
+              libx11
+              libxrandr
+              libxi
+              libxinerama
+              libxcursor
               ;
           };
 
@@ -58,10 +53,6 @@
               mesa
               ;
           });
-
-          shellHook = ''
-            export SHELL='${pkgs.mksh}/bin/mksh'
-          '';
         };
       }
     );
