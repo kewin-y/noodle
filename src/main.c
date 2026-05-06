@@ -1,4 +1,6 @@
 #include "camera.h"
+#include "cglm/affine-post.h"
+#include "cglm/affine.h"
 #include "glad/glad.h"
 #include "mesh.h"
 #include "shader.h"
@@ -27,6 +29,7 @@ struct App {
   struct Texture texture;
 
   struct Shader cube_shader;
+  struct Shader light_shader;
 
   struct Mesh cube;
   struct Mesh light;
@@ -132,10 +135,16 @@ static bool app_init(struct App *app)
   app->delta_time = 0.0f;
   app->last_frame = 0.0f;
   app->texture.id = 0;
+
   app->cube_shader.id = 0;
   app->cube.vao = 0;
   app->cube.vbo = 0;
   app->cube.vertex_count = 0;
+
+  app->light_shader.id = 0;
+  app->light.vao = 0;
+  app->light.vbo = 0;
+  app->light.vertex_count = 0;
 
   n_camera_init(&app->camera);
 
@@ -157,7 +166,13 @@ static bool app_init(struct App *app)
     return false;
   }
 
+  if (!n_shader_init(&app->light_shader, ASSETS_PATH "shaders/cube_vert.glsl",
+                     ASSETS_PATH "shaders/light_frag.glsl")) {
+    return false;
+  }
+
   n_mesh_init_cube(&app->cube, true);
+  n_mesh_init_cube(&app->light, false);
 
   n_shader_use(&app->cube_shader);
 
@@ -170,31 +185,49 @@ static bool app_init(struct App *app)
 
 static void app_render(struct App *app)
 {
-  mat4 model;
   mat4 view;
-  mat4 projection;
+  mat4 proj;
 
-  glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+  mat4 model_cube;
+  mat4 model_light;
+
+  vec3 light_pos = {1.2f, 1.0f, 2.0f};
+  vec3 light_scale = {0.2f, 0.2f, 0.2f};
+
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  // Bind
+  // Bind Cube texture
   n_texture_bind(&app->texture, 0);
   n_shader_use(&app->cube_shader);
 
-  // Setup
+  // Setup Cube math
   n_camera_view_matrix(&app->camera, view);
   glm_perspective(glm_rad(45.0f),
                   (float)app->window.width / (float)app->window.height,
-                  0.1f, 100.0f, projection);
+                  0.1f, 100.0f, proj);
 
   n_shader_set_uniform_m4(&app->cube_shader, "view", &view[0][0]);
-  n_shader_set_uniform_m4(&app->cube_shader, "projection", &projection[0][0]);
+  n_shader_set_uniform_m4(&app->cube_shader, "projection", &proj[0][0]);
 
-  glm_mat4_identity(model);
-  n_shader_set_uniform_m4(&app->cube_shader, "model", &model[0][0]);
+  glm_mat4_identity(model_cube);
+  n_shader_set_uniform_m4(&app->cube_shader, "model", &model_cube[0][0]);
 
-  // Render
+  // Render Cube
   n_mesh_draw(&app->cube);
+
+  // Use light shader
+  n_shader_use(&app->light_shader);
+  n_shader_set_uniform_m4(&app->light_shader, "view", &view[0][0]);
+  n_shader_set_uniform_m4(&app->light_shader, "projection", &proj[0][0]);
+
+  glm_mat4_identity(model_light);
+  glm_translated(model_light, light_pos);
+  glm_scale(model_light, light_scale);
+
+  n_shader_set_uniform_m4(&app->light_shader, "model", &model_light[0][0]);
+
+  n_mesh_draw(&app->light);
 }
 
 int main(void)
