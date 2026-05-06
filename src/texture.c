@@ -36,15 +36,15 @@ bool n_init_texture(struct Texture *texture, const char *path)
   glGenTextures(1, &texture->id);
   glBindTexture(GL_TEXTURE_2D, texture->id);
 
-  /* TEXTURE WRAPPING */
+  // Texture wrapping
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-  /* TEXTURE FILTERING */
+  // Texture filtering
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-  /* LOAD TEXTURE */
+  // Load texture
   data = stbi_load(path, &texture->width, &texture->height, &texture->num_channels, 0);
   if (NULL == data) {
     printf("n_Error in function init_texture(): "
@@ -64,15 +64,16 @@ bool n_init_texture(struct Texture *texture, const char *path)
     return false;
   }
 
-  /* GENERATE MIPMAPS */
+  // Define texture
   glTexImage2D(GL_TEXTURE_2D, 0, format, texture->width, texture->height,
                0, format, GL_UNSIGNED_BYTE, data);
+  // Mipmaps
   glGenerateMipmap(GL_TEXTURE_2D);
 
-  /* FREE */
+  // Free
   stbi_image_free(data);
 
-  /* UNBIND */
+  // Unbind
   glBindTexture(GL_TEXTURE_2D, 0);
   printf("Finished initializing texture with path: %s\n", path);
   printf("Texture: id: %d, width: %d, height: %d, num_channels: %d\n",

@@ -3,7 +3,7 @@
 #include "glad/glad.h"
 #include <stddef.h>
 
-void n_mesh_init_cube(struct Mesh *mesh, bool with_texture)
+void n_mesh_init_cube(struct Mesh *mesh, bool with_tex_coord)
 {
   // clang-format off
   float vertices_no_tex_coord[] = {
@@ -97,7 +97,7 @@ void n_mesh_init_cube(struct Mesh *mesh, bool with_texture)
 
   // 5 -> no. entries w/ texture (vec3 and vec2)
   // 3 -> no. entries w/o texture (vec3 only)
-  const size_t stride = with_texture ? 5 * sizeof(float) : 3 * sizeof(float);
+  const size_t stride = with_tex_coord ? 5 * sizeof(float) : 3 * sizeof(float);
 
   mesh->vertex_count = 36;
 
@@ -108,7 +108,7 @@ void n_mesh_init_cube(struct Mesh *mesh, bool with_texture)
 
   glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
 
-  if (with_texture)
+  if (with_tex_coord)
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_tex_coord),
                  vertices_tex_coord, GL_STATIC_DRAW);
   else
@@ -118,7 +118,7 @@ void n_mesh_init_cube(struct Mesh *mesh, bool with_texture)
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void *)0);
   glEnableVertexAttribArray(0);
 
-  if (with_texture) {
+  if (with_tex_coord) {
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, (void *)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
   }

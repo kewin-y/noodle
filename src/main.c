@@ -201,7 +201,7 @@ static void app_render(struct App *app)
   n_texture_bind(&app->texture, 0);
   n_shader_use(&app->cube_shader);
 
-  // Setup Cube math
+  // MATH (view projection)
   n_camera_view_matrix(&app->camera, view);
   glm_perspective(glm_rad(45.0f),
                   (float)app->window.width / (float)app->window.height,
@@ -210,6 +210,7 @@ static void app_render(struct App *app)
   n_shader_set_uniform_m4(&app->cube_shader, "view", &view[0][0]);
   n_shader_set_uniform_m4(&app->cube_shader, "projection", &proj[0][0]);
 
+  // Cube math
   glm_mat4_identity(model_cube);
   n_shader_set_uniform_m4(&app->cube_shader, "model", &model_cube[0][0]);
 
@@ -218,6 +219,7 @@ static void app_render(struct App *app)
 
   // Use light shader
   n_shader_use(&app->light_shader);
+
   n_shader_set_uniform_m4(&app->light_shader, "view", &view[0][0]);
   n_shader_set_uniform_m4(&app->light_shader, "projection", &proj[0][0]);
 
@@ -225,6 +227,7 @@ static void app_render(struct App *app)
   glm_translated(model_light, light_pos);
   glm_scale(model_light, light_scale);
 
+  // Light math
   n_shader_set_uniform_m4(&app->light_shader, "model", &model_light[0][0]);
 
   n_mesh_draw(&app->light);
