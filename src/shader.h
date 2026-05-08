@@ -16,5 +16,6 @@ void n_shader_set_uniform_f(const struct Shader *shader, const char *name, float
 void n_shader_set_uniform_b(const struct Shader *shader, const char *name, int value);
 void n_shader_set_uniform_m4(const struct Shader *shader, const char *name,
                              const float *mat);
+void n_shader_set_uniform_v3(const struct Shader *shader, const char *name, const float *vec);
 
 #endif

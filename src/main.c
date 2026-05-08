@@ -193,6 +193,7 @@ static void app_render(struct App *app)
 
   vec3 light_pos = {1.2f, 1.0f, 2.0f};
   vec3 light_scale = {0.2f, 0.2f, 0.2f};
+  vec3 light_color = {1.0f, 1.0f, 0.0f};
 
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -209,6 +210,7 @@ static void app_render(struct App *app)
 
   n_shader_set_uniform_m4(&app->cube_shader, "view", &view[0][0]);
   n_shader_set_uniform_m4(&app->cube_shader, "projection", &proj[0][0]);
+  n_shader_set_uniform_v3(&app->cube_shader, "light_color", &light_color[0]);
 
   // Cube math
   glm_mat4_identity(model_cube);
