@@ -1,6 +1,8 @@
 #include "camera.h"
 #include "cglm/affine-post.h"
 #include "cglm/affine.h"
+#include "cglm/mat3.h"
+#include "cglm/mat4.h"
 #include "glad/glad.h"
 #include "mesh.h"
 #include "shader.h"
@@ -184,11 +186,12 @@ static void app_render(struct App *app)
   mat4 proj;
 
   mat4 model_cube;
+  mat3 model_cube_inv_T;
   mat4 model_light;
 
   vec3 light_pos = {1.2f, 1.0f, 2.0f};
   vec3 light_scale = {0.2f, 0.2f, 0.2f};
-  vec3 light_color = {1.0f, 1.0f, 0.0f};
+  vec3 light_color = {1.0f, 1.0f, 1.0f};
 
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -206,10 +209,16 @@ static void app_render(struct App *app)
   n_shader_set_uniform_m4(&app->cube_shader, "view", &view[0][0]);
   n_shader_set_uniform_m4(&app->cube_shader, "projection", &proj[0][0]);
   n_shader_set_uniform_v3(&app->cube_shader, "light_color", &light_color[0]);
+  n_shader_set_uniform_v3(&app->cube_shader, "light_pos", &light_pos[0]);
 
   // Cube math
   glm_mat4_identity(model_cube);
+  mat3 m3;
+  glm_mat4_pick3(model_cube, m3);
+  glm_mat3_inv(m3, model_cube_inv_T);
+  glm_mat3_transpose(model_cube_inv_T);
   n_shader_set_uniform_m4(&app->cube_shader, "model", &model_cube[0][0]);
+  n_shader_set_uniform_m3(&app->cube_shader, "model_inv_T", &model_cube_inv_T[0][0]);
 
   // Render Cube
   n_mesh_draw(&app->cube);

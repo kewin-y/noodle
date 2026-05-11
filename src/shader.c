@@ -170,6 +170,13 @@ void n_shader_set_uniform_m4(const struct Shader *shader, const char *name,
                      mat);
 }
 
+void n_shader_set_uniform_m3(const struct Shader *shader, const char *name,
+                             const float *mat)
+{
+  glUniformMatrix3fv(glGetUniformLocation(shader->id, name), 1, GL_FALSE,
+                     mat);
+}
+
 void n_shader_set_uniform_v3(const struct Shader *shader, const char *name, const float *vec)
 {
   // `count` represents how many vec3s, mat4s, etc. will be passed in
