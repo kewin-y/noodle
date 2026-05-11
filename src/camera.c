@@ -59,7 +59,7 @@ void n_camera_move_up(struct Camera *camera, float amount)
 
 void n_camera_process_mouse(struct Camera *camera, float x_offset, float y_offset)
 {
-  const float sensitivity = 0.2f;
+  const float sensitivity = 0.1f;
 
   camera->yaw += x_offset * sensitivity;
   camera->pitch += y_offset * sensitivity;

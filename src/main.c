@@ -32,7 +32,6 @@ struct App {
   struct Shader light_shader;
 
   struct Mesh cube;
-  struct Mesh light;
 
   float delta_time;
   float last_frame;
@@ -142,9 +141,6 @@ static bool app_init(struct App *app)
   app->cube.vertex_count = 0;
 
   app->light_shader.id = 0;
-  app->light.vao = 0;
-  app->light.vbo = 0;
-  app->light.vertex_count = 0;
 
   n_camera_init(&app->camera);
 
@@ -171,8 +167,7 @@ static bool app_init(struct App *app)
     return false;
   }
 
-  n_mesh_init_cube(&app->cube, true);
-  n_mesh_init_cube(&app->light, false);
+  n_mesh_init_cube(&app->cube);
 
   n_shader_use(&app->cube_shader);
 
@@ -232,7 +227,8 @@ static void app_render(struct App *app)
   // Light math
   n_shader_set_uniform_m4(&app->light_shader, "model", &model_light[0][0]);
 
-  n_mesh_draw(&app->light);
+  // Render same mesh for light
+  n_mesh_draw(&app->cube);
 }
 
 int main(void)
