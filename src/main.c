@@ -210,6 +210,7 @@ static void app_render(struct App *app)
   n_shader_set_uniform_m4(&app->cube_shader, "projection", &proj[0][0]);
   n_shader_set_uniform_v3(&app->cube_shader, "light_color", &light_color[0]);
   n_shader_set_uniform_v3(&app->cube_shader, "light_pos", &light_pos[0]);
+  n_shader_set_uniform_v3(&app->cube_shader, "view_pos", &app->camera.pos[0]);
 
   // Cube math
   glm_mat4_identity(model_cube);

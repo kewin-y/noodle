@@ -9,9 +9,11 @@ out vec2 v_tex_coord;
 out vec3 v_frag_pos;
 
 uniform mat4 model;
-uniform mat3 model_inv_T;
 uniform mat4 view;
 uniform mat4 projection;
+
+uniform mat3 model_inv_T;
+uniform vec3 view_pos;
 
 void main()
 {
